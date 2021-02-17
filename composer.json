@@ -1,0 +1,26 @@
+{
+    "name": "enjoys/url-converter",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Enjoys",
+            "email": "deadly.info@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4 | ^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Enjoys\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Enjoys\\": "tests/"
+        }
+    }
+}
