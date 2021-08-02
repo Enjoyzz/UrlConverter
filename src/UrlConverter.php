@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Enjoys;
 
@@ -7,32 +8,51 @@ namespace Enjoys;
 class UrlConverter
 {
 
+    private string $path = '';
+
+    /**
+     * @var array{fragment?: string, host?: string, pass?: string, path?: string, port?: int, query?: string, scheme?: string, user?: string}
+     */
+    private array $baseUrlParsed = [];
+
+    /**
+     * @param string $baseUrl
+     * @param string $relativeUrl
+     * @return false|string
+     */
     public function relativeToAbsolute(string $baseUrl, string $relativeUrl)
     {
-        $path = parse_url($relativeUrl, PHP_URL_PATH);
-        if ($path === false) {
-            return $relativeUrl;
+        if (false === $path = parse_url($relativeUrl, PHP_URL_PATH)) {
+            return false;
         }
-        $base = parse_url($baseUrl);
-        $base['path'] = $this->normalizePath(pathinfo($base['path'], PATHINFO_DIRNAME)) . '/' . $path;
 
-        if (str_starts_with($path, '/')) {
-            $base['path'] = $path;
+        $this->path = $path;
+
+        if(false === $this->baseUrlParsed = parse_url($baseUrl)){
+            return false;
         }
-        $base['path'] = $this->url_remove_dot_segments($base['path']);
-        return $this->join_url($base);
+
+        $this->baseUrlParsed['path'] = $this->normalizePath(
+                pathinfo($this->baseUrlParsed['path'] ?? '', PATHINFO_DIRNAME)
+            ) . '/' . $this->path;
+
+        if (str_starts_with($this->path, '/')) {
+            $this->baseUrlParsed['path'] = $this->path;
+        }
+        $this->baseUrlParsed['path'] = $this->url_remove_dot_segments($this->baseUrlParsed['path']);
+        return $this->join_url($this->baseUrlParsed);
     }
 
 
-    private function normalizePath($path)
+    private function normalizePath(string $path): string
     {
         if ($path === '\\') {
-            return null;
+            return '';
         }
         return $path;
     }
 
-    private function url_remove_dot_segments($path)
+    private function url_remove_dot_segments(string $path): string
     {
         // multi-byte character explode
         $inSegs = preg_split('!/!u', $path);
@@ -60,9 +80,13 @@ class UrlConverter
     }
 
 
-    function join_url($parts)
+    /**
+     * @param array{fragment?: string, host?: string, pass?: string, path?: string, port?: int, query?: string, scheme?: string, user?: string} $parts
+     * @return string
+     */
+    private function join_url(array $parts): string
     {
-        $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : null;
+        $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
 
         $host = $parts['host'] ?? '';
         $port = $parts['port'] ?? '';
@@ -71,7 +95,7 @@ class UrlConverter
         $pass = ($user || $pass) ? "$pass@" : '';
         $path = $parts['path'] ?? '';
         $query = $parts['query'] ?? '';
-        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : null;
+        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
 
