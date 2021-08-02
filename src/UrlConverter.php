@@ -22,15 +22,20 @@ class UrlConverter
      */
     public function relativeToAbsolute(string $baseUrl, string $relativeUrl)
     {
-        if (false === $path = parse_url($relativeUrl, PHP_URL_PATH)) {
+        if (false === $path = parse_url($relativeUrl)) {
             return false;
         }
 
-        $this->path = $path;
+        if(isset($path['scheme'])){
+            return $relativeUrl;
+        }
 
-        if (false === $this->baseUrlParts = parse_url($baseUrl)) {
+        $this->path = $path['path'];
+
+        if (false === $parts = parse_url($baseUrl)) {
             return false;
         }
+        $this->baseUrlParts = $parts;
 
         $this->baseUrlParts['path'] = $this->normalizePath(
                 pathinfo($this->getBaseUrlPart('path'), PATHINFO_DIRNAME)
@@ -115,6 +120,18 @@ class UrlConverter
 
         if ($part === 'fragment') {
             return '#' . ($this->baseUrlParts['fragment'] ?? '');
+        }
+
+        if ($part === 'query') {
+            return '?' . ($this->baseUrlParts['query'] ?? '');
+        }
+
+        if ($part === 'pass') {
+            return ':' . ($this->baseUrlParts['pass'] ?? '');
+        }
+
+        if ($part === 'port') {
+            return ':' . ($this->baseUrlParts['port'] ?? '');
         }
 
         return (string)$this->baseUrlParts[$part];

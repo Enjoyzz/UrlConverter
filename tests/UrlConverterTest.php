@@ -18,6 +18,31 @@ class UrlConverterTest extends TestCase
             ['http://yandex.ru/1/2/3/test.css', './4/', 'http://yandex.ru/1/2/3/4/'],
             ['http://yandex.ru/1/2/3/test.css', '../../4/', 'http://yandex.ru/1/4/'],
             ['http://yandex.ru/1/2/3/test.css', '/4', 'http://yandex.ru/4'],
+            [
+                'http://usr:pss@example.com:81/mypath/myfile.html?a=b&b[]=2&b[]=3#myfragment',
+                '/4',
+                'http://usr:pss@example.com:81/4?a=b&b[]=2&b[]=3#myfragment'
+            ],
+            [
+                'http://usr:pss@example.com:81/mypath/myfile.html?a=b&b[]=2&b[]=3#myfragment',
+                '4.txt',
+                'http://usr:pss@example.com:81/mypath/4.txt?a=b&b[]=2&b[]=3#myfragment'
+            ],
+            [
+                'http:///fail',
+                '/../test.css',
+                false
+            ],
+            [
+                'http://text.com',
+                'http:///fail',
+                false
+            ],
+            [
+                'http://text.com',
+                'http://domain.com',
+                'http://domain.com'
+            ],
         ];
     }
 
