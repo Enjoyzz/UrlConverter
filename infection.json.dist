@@ -4,6 +4,12 @@
             "src"
         ]
     },
+    "logs": {
+        "text": "php:\/\/stderr",
+        "badge": {
+            "branch": "master"
+        }
+    },
     "mutators": {
         "@default": true
     }
