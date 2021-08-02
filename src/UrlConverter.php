@@ -39,7 +39,7 @@ class UrlConverter
         if (str_starts_with($this->path, '/')) {
             $this->baseUrlParts['path'] = $this->getPath();
         }
-        $this->baseUrlParts['path'] = $this->url_remove_dot_segments($this->getBaseUrlPart('path'));
+        $this->baseUrlParts['path'] = $this->urlRemoveDotSegments($this->getBaseUrlPart('path'));
         return $this->buildUrl();
     }
 
@@ -52,22 +52,22 @@ class UrlConverter
         return $path;
     }
 
-    private function url_remove_dot_segments(string $path): string
+    private function urlRemoveDotSegments(string $path): string
     {
         // multi-byte character explode
-        $inSegs = preg_split('!/!u', $path);
-        $outSegs = array();
-        foreach ($inSegs as $seg) {
-            if ($seg == '' || $seg == '.') {
+        $inSegments = preg_split('!/!u', $path);
+        $outSegments = array();
+        foreach ($inSegments as $segment) {
+            if ($segment == '' || $segment == '.') {
                 continue;
             }
-            if ($seg == '..') {
-                array_pop($outSegs);
+            if ($segment == '..') {
+                array_pop($outSegments);
             } else {
-                array_push($outSegs, $seg);
+                array_push($outSegments, $segment);
             }
         }
-        $outPath = implode('/', $outSegs);
+        $outPath = implode('/', $outSegments);
         if ($path[0] == '/') {
             $outPath = '/' . $outPath;
         }
