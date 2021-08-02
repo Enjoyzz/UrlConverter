@@ -33,13 +33,13 @@ class UrlConverter
         }
 
         $this->baseUrlParts['path'] = $this->normalizePath(
-                pathinfo($this->baseUrlParts['path'] ?? '', PATHINFO_DIRNAME)
-            ) . '/' . $this->path;
+                pathinfo($this->getBaseUrlPart('path'), PATHINFO_DIRNAME)
+            ) . '/' . $this->getPath();
 
         if (str_starts_with($this->path, '/')) {
-            $this->baseUrlParts['path'] = $this->path;
+            $this->baseUrlParts['path'] = $this->getPath();
         }
-        $this->baseUrlParts['path'] = $this->url_remove_dot_segments($this->baseUrlParts['path']);
+        $this->baseUrlParts['path'] = $this->url_remove_dot_segments($this->getBaseUrlPart('path'));
         return $this->buildUrl();
     }
 
@@ -85,14 +85,8 @@ class UrlConverter
      */
     private function buildUrl(): string
     {
-        $user = $this->getBaseUrlPart('user');
-        $pass = $this->getBaseUrlPart('pass');
-        $pass = ($user || $pass) ? "$pass@" : '';
-
-
         return $this->getBaseUrlPart('scheme')
-            . $user
-            . $pass
+            . $this->getBaseUrlPartUserPass()
             . $this->getBaseUrlPart('host')
             . $this->getBaseUrlPart('port')
             . $this->getBaseUrlPart('path')
@@ -100,24 +94,20 @@ class UrlConverter
             . $this->getBaseUrlPart('fragment');
     }
 
-    /**
-     * @return array
-     */
-    public function getBaseUrlParts(): array
+    private function getBaseUrlPartUserPass(): string
     {
-        return $this->baseUrlParts;
+        $user = $this->getBaseUrlPart('user');
+        $pass = $this->getBaseUrlPart('pass');
+        $pass = ($user || $pass) ? "$pass@" : '';
+        return $user . $pass;
     }
 
-    /**
-     * @param string $part
-     * @return string|int
-     */
-    public function getBaseUrlPart(string $part)
+
+    private function getBaseUrlPart(string $part): string
     {
         if (!isset($this->baseUrlParts[$part])) {
             return '';
         }
-
 
         if ($part === 'scheme') {
             return ($this->baseUrlParts['scheme'] ?? 'http') . '://';
@@ -127,7 +117,13 @@ class UrlConverter
             return '#' . ($this->baseUrlParts['fragment'] ?? '');
         }
 
-        return $this->baseUrlParts[$part];
+        return (string)$this->baseUrlParts[$part];
+    }
+
+
+    private function getPath(): string
+    {
+        return $this->path;
     }
 
 }
