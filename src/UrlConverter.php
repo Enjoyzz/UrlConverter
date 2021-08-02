@@ -13,7 +13,7 @@ class UrlConverter
     /**
      * @var array{fragment?: string, host?: string, pass?: string, path?: string, port?: int, query?: string, scheme?: string, user?: string}
      */
-    private array $baseUrlParsed = [];
+    private array $baseUrlParts = [];
 
     /**
      * @param string $baseUrl
@@ -28,19 +28,19 @@ class UrlConverter
 
         $this->path = $path;
 
-        if(false === $this->baseUrlParsed = parse_url($baseUrl)){
+        if (false === $this->baseUrlParts = parse_url($baseUrl)) {
             return false;
         }
 
-        $this->baseUrlParsed['path'] = $this->normalizePath(
-                pathinfo($this->baseUrlParsed['path'] ?? '', PATHINFO_DIRNAME)
+        $this->baseUrlParts['path'] = $this->normalizePath(
+                pathinfo($this->baseUrlParts['path'] ?? '', PATHINFO_DIRNAME)
             ) . '/' . $this->path;
 
         if (str_starts_with($this->path, '/')) {
-            $this->baseUrlParsed['path'] = $this->path;
+            $this->baseUrlParts['path'] = $this->path;
         }
-        $this->baseUrlParsed['path'] = $this->url_remove_dot_segments($this->baseUrlParsed['path']);
-        return $this->join_url($this->baseUrlParsed);
+        $this->baseUrlParts['path'] = $this->url_remove_dot_segments($this->baseUrlParts['path']);
+        return $this->buildUrl();
     }
 
 
@@ -81,22 +81,53 @@ class UrlConverter
 
 
     /**
-     * @param array{fragment?: string, host?: string, pass?: string, path?: string, port?: int, query?: string, scheme?: string, user?: string} $parts
      * @return string
      */
-    private function join_url(array $parts): string
+    private function buildUrl(): string
     {
-        $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
-
-        $host = $parts['host'] ?? '';
-        $port = $parts['port'] ?? '';
-        $user = $parts['user'] ?? '';
-        $pass = $parts['pass'] ?? '';
+        $user = $this->getBaseUrlPart('user');
+        $pass = $this->getBaseUrlPart('pass');
         $pass = ($user || $pass) ? "$pass@" : '';
-        $path = $parts['path'] ?? '';
-        $query = $parts['query'] ?? '';
-        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
-        return "$scheme$user$pass$host$port$path$query$fragment";
+
+
+        return $this->getBaseUrlPart('scheme')
+            . $user
+            . $pass
+            . $this->getBaseUrlPart('host')
+            . $this->getBaseUrlPart('port')
+            . $this->getBaseUrlPart('path')
+            . $this->getBaseUrlPart('query')
+            . $this->getBaseUrlPart('fragment');
+    }
+
+    /**
+     * @return array
+     */
+    public function getBaseUrlParts(): array
+    {
+        return $this->baseUrlParts;
+    }
+
+    /**
+     * @param string $part
+     * @return string|int
+     */
+    public function getBaseUrlPart(string $part)
+    {
+        if (!isset($this->baseUrlParts[$part])) {
+            return '';
+        }
+
+
+        if ($part === 'scheme') {
+            return ($this->baseUrlParts['scheme'] ?? 'http') . '://';
+        }
+
+        if ($part === 'fragment') {
+            return '#' . ($this->baseUrlParts['fragment'] ?? '');
+        }
+
+        return $this->baseUrlParts[$part];
     }
 
 }
