@@ -10,6 +10,7 @@ class UrlConverterTest extends TestCase
     public function data()
     {
         return [
+            ['http://yandex.ru/test.css', '1/2/3/test.css', 'http://yandex.ru/1/2/3/test.css'],
             ['http://yandex.ru/test.css', '1/2/3/', 'http://yandex.ru/1/2/3/'],
             ['http://yandex.ru/test.css', '../3/', 'http://yandex.ru/3/'],
             ['http://yandex.ru/test.css', '../../../../3/', 'http://yandex.ru/3/'],
