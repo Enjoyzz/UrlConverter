@@ -30,7 +30,7 @@ class UrlConverter
             return $relativeUrl;
         }
 
-        $this->path = $path['path'];
+        $this->path = $path['path'] ?? '';
 
         if (false === $parts = parse_url($baseUrl)) {
             return false;
