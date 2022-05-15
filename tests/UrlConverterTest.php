@@ -44,6 +44,7 @@ class UrlConverterTest extends TestCase
                 'http://domain.com',
                 'http://domain.com'
             ],
+            ['http://test.com', '/module/catalog/?app=download&file=227/file.pdf', 'http://test.com/module/catalog/?app=download&file=227/file.pdf']
         ];
     }
 
